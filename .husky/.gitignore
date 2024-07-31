@@ -1,1 +1,6 @@
-_
+node_modules
+.idea
+dist
+.eslintcache
+.env
+.env
