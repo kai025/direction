@@ -17,8 +17,6 @@ const useUserLocation = () => {
         const country = location.country;
         setLocation(country || "nature");
       } catch (error) {
-        console.error("Error fetching location:", error);
-        setError("Unable to fetch location");
         setLocation("nature");
       }
     };
@@ -29,13 +27,10 @@ const useUserLocation = () => {
           fetchLocation(position.coords.latitude, position.coords.longitude);
         },
         (error) => {
-          console.error("Error getting geolocation:", error);
-          setError("Geolocation not available");
           setLocation("nature");
         }
       );
     } else {
-      setError("Geolocation not supported");
       setLocation("nature");
     }
   }, []);

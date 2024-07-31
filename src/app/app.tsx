@@ -1,21 +1,30 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import SearchIcon from "assets/icons/compass.svg";
 import LoadingIcon from "assets/icons/loading.svg";
 import useUnsplashImages from "hooks/getImages";
 import useUserLocation from "hooks/getLocation"; // Import the custom hook
 import Card from "components/common/Card";
 import Masonry from "react-masonry-css";
+import getDirections from "hooks/getDirections";
+import type { SearchResult } from "hooks/types"; // Import the SearchResult type
 import "./app.css"; // Add any custom CSS for Masonry here
 
 const App: React.FC = () => {
   const { location, error: locationError } = useUserLocation(); // Use the custom hook
-  const [searchTerm, setSearchTerm] = useState<string>(location || "nature");
-  const [searchQuery, setSearchQuery] = useState<string>(location || "nature");
-  const { images, loading, error } = useUnsplashImages(searchQuery);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const {
+    images,
+    loading: imagesLoading,
+    error: imagesError,
+  } = useUnsplashImages(location || "nature");
   const [backgroundImage, setBackgroundImage] = useState<string>("");
   const [paddingPixel, setPaddingPixel] = useState<number>(
     window.innerHeight * 0.3
   );
+
+  const { processSearch, results, loading, error } = getDirections(); // Use the custom hook
 
   useEffect(() => {
     if (location) {
@@ -44,8 +53,9 @@ const App: React.FC = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    await processSearch(searchTerm);
     setSearchQuery(searchTerm);
   };
 
@@ -83,23 +93,30 @@ const App: React.FC = () => {
               type="submit"
               className="absolute right-8 p-2 text-xl rounded-r-full flex items-center justify-center h-full w-9 text-brandblue hover:text-brandgold"
             >
-              {loading ? <LoadingIcon /> : <SearchIcon />}
+              {imagesLoading || loading ? <LoadingIcon /> : <SearchIcon />}
             </button>
           </div>
         </form>
+
         {locationError && (
           <p className="text-red-500 text-center">{locationError}</p>
         )}
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        <Masonry
-          breakpointCols={breakpointColumnsObj}
-          className="my-masonry-grid"
-          columnClassName="my-masonry-grid_column"
-        >
-          {images.slice(1).map((image) => (
-            <Card key={image.id} image={image} />
+        {imagesError && (
+          <p className="text-red-500 text-center">{imagesError}</p>
+        )}
+
+        <div className="results">
+          {results.map((result: SearchResult) => (
+            <div key={result.id} className="result-item">
+              <h3>{result.name}</h3>
+              <p>{result.description}</p>
+              <a href={result.link} target="_blank" rel="noopener noreferrer">
+                <img src={result.image} alt={result.name} />
+              </a>
+              <p>Type: {result.nodeType}</p>
+            </div>
           ))}
-        </Masonry>
+        </div>
       </header>
     </main>
   );
