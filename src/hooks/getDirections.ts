@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { allowedItems } from "./allowedItems";
 import type {
   OpenAIResponse,
   SearchResult,
@@ -12,37 +13,6 @@ const getDirections = () => {
   const [error, setError] = useState<Error | null>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchParams, setSearchParams] = useState<ProcessedData | null>(null);
-
-  const allowedItems = {
-    cities: ["Amsterdam"],
-    keywords: [
-      "Event_Venue",
-      "Function_Room_Facility",
-      "Office_Space_Rental_Agency",
-      "Pub",
-      "Recording_Studio",
-      "Cheese_Shop",
-      "Deli",
-      "Live_Music_Bar",
-      "Bar",
-      "Cafe",
-      "Piano_Bar",
-      "Restaurant",
-      "Cocktail_Bar",
-      "Entertainer",
-      "Wi-Fi_Spot",
-      "Wine_Bar",
-      "Museum",
-      "Art_Museum",
-      "Cultural_Center",
-      "Modern_Art_Museum",
-      "Tourist_Attraction",
-      "Barbecue_Restaurant",
-      "Egyptian_Restaurant",
-      "Hotel",
-    ],
-    nodeTypes: ["City", "Hotel", "Import", "Keyword"],
-  };
 
   const processSearch = async (searchTerm: string) => {
     setLoading(true);
