@@ -26,13 +26,6 @@ const App: React.FC = () => {
     getDirections(); // Use the custom hook
 
   useEffect(() => {
-    if (location) {
-      setSearchTerm(location);
-      setSearchQuery(location);
-    }
-  }, [location]);
-
-  useEffect(() => {
     if (images.length > 0) {
       setBackgroundImage(images[0].urls.full);
     }
