@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import SearchIcon from "assets/icons/compass.svg";
 import LoadingIcon from "assets/icons/loading.svg";
 import useUnsplashImages from "hooks/getImages";
@@ -88,7 +89,7 @@ const App: React.FC = () => {
               value={searchTerm}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
-              placeholder="Search for images..."
+              placeholder="Search for inspiration..."
               className="p-2 w-full text-xl rounded-l-full rounded-r-full text-gray"
             />
             <button
