@@ -1,11 +1,8 @@
-import type React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import SearchIcon from "assets/icons/compass.svg";
 import LoadingIcon from "assets/icons/loading.svg";
 import useUnsplashImages from "hooks/getImages";
 import useUserLocation from "hooks/getLocation"; // Import the custom hook
-import Card from "components/common/Card";
-import Masonry from "react-masonry-css";
 import getDirections from "hooks/getDirections";
 import type { SearchResult } from "hooks/types"; // Import the SearchResult type
 import "./app.css"; // Add any custom CSS for Masonry here
@@ -24,7 +21,8 @@ const App: React.FC = () => {
     window.innerHeight * 0.3
   );
 
-  const { processSearch, results, loading, error } = getDirections(); // Use the custom hook
+  const { processSearch, results, loading, error, searchParams } =
+    getDirections(); // Use the custom hook
 
   useEffect(() => {
     if (location) {
@@ -53,10 +51,16 @@ const App: React.FC = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleSearchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSearch = async () => {
     await processSearch(searchTerm);
     setSearchQuery(searchTerm);
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      await handleSearch();
+    }
   };
 
   const breakpointColumnsObj = {
@@ -77,33 +81,36 @@ const App: React.FC = () => {
         className="relative z-10 max-w-[1700px] flex flex-col items-center justify-center mx-auto"
         style={{ paddingTop: `${paddingPixel}px` }}
       >
-        <form
-          onSubmit={handleSearchSubmit}
-          className="flex justify-center mb-8 max-w-screen-lg w-full "
-        >
-          <div className="relative w-full  flex items-center px-8">
+        <div className="flex justify-center mb-8 max-w-screen-lg w-full ">
+          <div className="relative w-full flex items-center px-8">
             <input
               type="text"
               value={searchTerm}
               onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
               placeholder="Search for images..."
               className="p-2 w-full text-xl rounded-l-full rounded-r-full text-gray"
             />
             <button
-              type="submit"
+              type="button"
               className="absolute right-8 p-2 text-xl rounded-r-full flex items-center justify-center h-full w-9 text-brandblue hover:text-brandgold"
+              onClick={handleSearch}
             >
-              {imagesLoading || loading ? <LoadingIcon /> : <SearchIcon />}
+              {loading ? <LoadingIcon /> : <SearchIcon />}
             </button>
           </div>
-        </form>
-
-        {locationError && (
-          <p className="text-red-500 text-center">{locationError}</p>
-        )}
-        {imagesError && (
-          <p className="text-red-500 text-center">{imagesError}</p>
-        )}
+        </div>
+        <div className="search-params text-white mb-8">
+          <p>
+            <strong>City:</strong> {searchParams?.city || "Any"}
+          </p>
+          <p>
+            <strong>Node Types:</strong> {searchParams?.nodeTypes.join(", ")}
+          </p>
+          <p>
+            <strong>Keywords:</strong> {searchParams?.keywords.join(", ")}
+          </p>
+        </div>
 
         <div className="results">
           {results.map((result: SearchResult) => (

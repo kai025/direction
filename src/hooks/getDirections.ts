@@ -11,6 +11,7 @@ const getDirections = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [searchParams, setSearchParams] = useState<ProcessedData | null>(null);
 
   const allowedItems = {
     cities: ["Amsterdam"],
@@ -47,6 +48,36 @@ const getDirections = () => {
     setLoading(true);
     setError(null);
 
+    const parseOpenAIResponse = (data: OpenAIResponse): ProcessedData => {
+      const functionCall = data.choices[0].message.function_call;
+      if (functionCall?.arguments) {
+        const args = JSON.parse(functionCall.arguments);
+        const keywords = args.keywords.filter((kw: string) =>
+          allowedItems.keywords.includes(kw)
+        );
+        const nodeTypes = args.nodeTypes.filter((nt: string) =>
+          allowedItems.nodeTypes.includes(nt)
+        );
+        const city = allowedItems.cities.includes(args.city) ? args.city : "";
+        return {
+          search: args.search,
+          keywords,
+          nodeTypes,
+          city,
+          limit: args.limit,
+          offset: args.offset,
+        };
+      }
+      return {
+        search: "",
+        keywords: [],
+        nodeTypes: [],
+        city: "",
+        limit: 10,
+        offset: 0,
+      };
+    };
+
     try {
       // Call OpenAI API to process the search string
       const apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -57,7 +88,7 @@ const getDirections = () => {
       };
 
       const requestBody = {
-        model: "gpt-4-0613", // Use the appropriate model
+        model: "gpt-4o-mini", // Use the appropriate model
         messages: [
           {
             role: "user",
@@ -102,6 +133,7 @@ const getDirections = () => {
       });
 
       const searchQueryObject = parseOpenAIResponse(data);
+      setSearchParams(searchQueryObject);
 
       // Make the request to the directions API
       const directionsResponse = await axios.post<DirectionsResponse>(
@@ -116,39 +148,7 @@ const getDirections = () => {
       setLoading(false);
     }
   };
-
-  const parseOpenAIResponse = (data: OpenAIResponse): ProcessedData => {
-    const functionCall = data.choices[0].message.function_call;
-    if (functionCall?.arguments) {
-      const args = JSON.parse(functionCall.arguments);
-      const keywords = args.keywords.filter((kw: string) =>
-        allowedItems.keywords.includes(kw)
-      );
-      const nodeTypes = args.nodeTypes.filter((nt: string) =>
-        allowedItems.nodeTypes.includes(nt)
-      );
-      const city = allowedItems.cities.includes(args.city) ? args.city : "";
-
-      return {
-        keywords,
-        nodeTypes,
-        city,
-        search: args.search,
-        limit: args.limit,
-        offset: args.offset,
-      };
-    }
-    return {
-      keywords: [],
-      nodeTypes: [],
-      city: "",
-      search: "",
-      limit: 10,
-      offset: 0,
-    };
-  };
-
-  return { processSearch, results, loading, error };
+  return { processSearch, results, loading, error, searchParams };
 };
 
 export default getDirections;
