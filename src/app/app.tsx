@@ -75,7 +75,7 @@ const App: React.FC = () => {
     <main
       className="relative min-h-screen bg-cover bg-center "
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5) 20%, rgba(0,0,0,1) 35%), url(${backgroundImage})`,
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5) 20%, rgba(0,0,0,1) 40%), url(${backgroundImage})`,
       }}
     >
       <header
